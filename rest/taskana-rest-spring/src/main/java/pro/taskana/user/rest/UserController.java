@@ -1,5 +1,6 @@
 package pro.taskana.user.rest;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import pro.taskana.common.api.exceptions.InvalidArgumentException;
 import pro.taskana.common.api.exceptions.NotAuthorizedException;
+import pro.taskana.common.api.security.CurrentUserContext;
 import pro.taskana.common.rest.RestEndpoints;
 import pro.taskana.user.api.UserService;
 import pro.taskana.user.api.exceptions.UserAlreadyExistException;
@@ -34,10 +36,15 @@ public class UserController {
   private final UserService userService;
   private final UserRepresentationModelAssembler userAssembler;
 
+  private final CurrentUserContext currentUserContext;
+
   @Autowired
-  UserController(UserService userService, UserRepresentationModelAssembler userAssembler) {
+  UserController(UserService userService,
+                 UserRepresentationModelAssembler userAssembler,
+                 CurrentUserContext currentUserContext) {
     this.userService = userService;
     this.userAssembler = userAssembler;
+    this.currentUserContext = currentUserContext;
   }
 
   /**
@@ -54,24 +61,36 @@ public class UserController {
   public ResponseEntity<UserRepresentationModel> getUser(@PathVariable String userId)
       throws UserNotFoundException, InvalidArgumentException {
     User user = userService.getUser(userId);
-
     return ResponseEntity.ok(userAssembler.toModel(user));
   }
 
   /**
    * This endpoint retrieves multiple Users. If a userId can't be found in the database it will be
    * ignored. If none of the given userIds is valid, the returned list will be empty.
+   * If currentUser is set, the current User from the context will be retrieved as well
    *
    * @title Get multiple Users
    * @param userIds the ids of the requested Users
+   * @param currentUser boolean to indicate whether to fetch the current user or not
    * @return the requested Users
    * @throws InvalidArgumentException if the userIds are null or empty
+   * @throws UserNotFoundException if the current User was not found
    */
   @GetMapping(RestEndpoints.URL_USERS)
   @Transactional(readOnly = true, rollbackFor = Exception.class)
   public ResponseEntity<UserCollectionRepresentationModel> getUsers(
-      @RequestParam(name = "user-id") String[] userIds) throws InvalidArgumentException {
-    List<User> users = userService.getUsers(new HashSet<>(List.of(userIds)));
+      @RequestParam(name = "user-id", required = false) String[] userIds,
+      @RequestParam(name = "current-user", required = false) String currentUser)
+          throws InvalidArgumentException, UserNotFoundException {
+    List<User> users = new ArrayList<>();
+
+    if (userIds != null) {
+      users.addAll(userService.getUsers(new HashSet<>(List.of(userIds))));
+    }
+
+    if (currentUser != null) {
+      users.add(userService.getUser(this.currentUserContext.getUserid()));
+    }
 
     return ResponseEntity.ok(userAssembler.toTaskanaCollectionModel(users));
   }
