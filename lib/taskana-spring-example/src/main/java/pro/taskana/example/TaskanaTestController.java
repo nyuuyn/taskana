@@ -12,6 +12,7 @@ import pro.taskana.common.api.TaskanaEngine;
 import pro.taskana.common.api.exceptions.DomainNotFoundException;
 import pro.taskana.common.api.exceptions.InvalidArgumentException;
 import pro.taskana.common.api.exceptions.NotAuthorizedException;
+import pro.taskana.common.api.exceptions.SystemException;
 import pro.taskana.common.internal.util.IdGenerator;
 import pro.taskana.workbasket.api.WorkbasketType;
 import pro.taskana.workbasket.api.exceptions.WorkbasketAlreadyExistException;
@@ -118,7 +119,7 @@ public class TaskanaTestController {
     Integer result =
             jdbcTemplate.queryForObject("SELECT COUNT(*) FROM WORKBASKET", Integer.class);
     if (result == null) {
-      throw new RuntimeException("Selecting count of workbaskets produced a null");
+      throw new SystemException("Selecting count of workbaskets produced a null");
     } else {
       return result;
     }
@@ -128,7 +129,7 @@ public class TaskanaTestController {
     Integer result =
             jdbcTemplate.queryForObject("SELECT COUNT(*) FROM CUSTOMDB.TEST", Integer.class);
     if (result == null) {
-      throw new RuntimeException("Selecting count of CUSTOMDB.TEST produced a null");
+      throw new SystemException("Selecting count of CUSTOMDB.TEST produced a null");
     } else {
       return result;
     }
