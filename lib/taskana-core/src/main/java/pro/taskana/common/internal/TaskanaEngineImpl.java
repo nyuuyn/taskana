@@ -495,6 +495,8 @@ public class TaskanaEngineImpl implements TaskanaEngine {
       Deque<SqlSessionManager> stack = getSessionStack();
       if (!stack.isEmpty()) {
         stack.pop();
+      } else {
+        sessionStack.remove();
       }
     }
   }

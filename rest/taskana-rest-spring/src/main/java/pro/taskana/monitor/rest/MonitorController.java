@@ -1,5 +1,6 @@
 package pro.taskana.monitor.rest;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -301,12 +302,18 @@ public class MonitorController {
     TaskStatusReport.Builder builder = monitorService.createTaskStatusReportBuilder();
     if (states != null && !states.isEmpty()) {
       builder = builder.stateIn(states);
+    } else {
+      states = new ArrayList<>();
     }
     if (domains != null && !domains.isEmpty()) {
       builder.domainIn(domains);
+    } else {
+      domains = new ArrayList<>();
     }
     if (workbasketIds != null && !workbasketIds.isEmpty()) {
       builder.workbasketIdsIn(workbasketIds);
+    } else {
+      workbasketIds = new ArrayList<>();
     }
     if (priorityMinimum != null) {
       builder.priorityMinimum(priorityMinimum);

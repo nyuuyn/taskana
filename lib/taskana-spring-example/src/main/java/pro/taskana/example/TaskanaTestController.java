@@ -115,11 +115,21 @@ public class TaskanaTestController {
 
   private int getWorkbaskets() {
     // return taskanaEngine.getWorkbasketService().getWorkbaskets().size();
-    return jdbcTemplate.queryForObject("SELECT COUNT(*) FROM WORKBASKET", Integer.class);
+    Integer result = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM WORKBASKET", Integer.class);
+    if (result == null) {
+      throw new RuntimeException("Selecting count of workbaskets produced a null");
+    } else {
+      return result;
+    }
   }
 
   private int getCustomdbTests() {
-    return jdbcTemplate.queryForObject("SELECT COUNT(*) FROM CUSTOMDB.TEST", Integer.class);
+    Integer result = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM CUSTOMDB.TEST", Integer.class);
+    if (result == null) {
+      throw new RuntimeException("Selecting count of CUSTOMDB.TEST produced a null");
+    } else {
+      return result;
+    }
   }
 
   private Workbasket createWorkBasket(String key, String name) {
